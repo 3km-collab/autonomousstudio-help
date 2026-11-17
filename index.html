@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en" data-i18n-doc>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Autonomous Studio — Custom Automation & API in any language</title>
+<meta name="description" content="Describe your software problem in any language. Get a plan and a fair price. Custom automation kits, APIs, datasets — delivered instantly after payment."/>
+<meta property="og:title" content="Autonomous Studio — Build any custom kit, in any language"/>
+<meta property="og:description" content="Submit a problem in your language and receive a solution plan + price. Production-grade kits from $19."/>
+<meta property="og:type" content="website"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  html { background:#05060a; }
+  body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, sans-serif; }
+  .grid-bg {
+    background-image:
+      linear-gradient(to right, rgba(99,102,241,.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(99,102,241,.07) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  }
+  .glow { box-shadow: 0 0 120px -20px rgba(99,102,241,.55); }
+  .card { background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.012));
+          border:1px solid rgba(255,255,255,.08); border-radius:1.25rem; }
+  .chip { background: rgba(99,102,241,.12); border:1px solid rgba(99,102,241,.35); }
+  .btn-grad { background:linear-gradient(135deg,#6366f1,#22d3ee); }
+  .dot { animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  details summary::-webkit-details-marker { display:none; }
+  select, textarea, input { color-scheme: dark; }
+</style>
+</head>
+<body class="bg-[#05060a] text-slate-300 antialiased min-h-screen">
+
+<div class="fixed inset-0 -z-10 grid-bg"></div>
+<div class="fixed -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[520px] rounded-full bg-indigo-600/20 blur-[130px] -z-10"></div>
+
+<!-- Header -->
+<header class="sticky top-0 z-30 backdrop-blur border-b border-white/5 bg-[#05060a]/70">
+  <div class="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-2.5">
+      <span class="w-8 h-8 rounded-lg grid place-items-center font-bold text-white text-sm btn-grad">AS</span>
+      <span class="font-semibold text-white tracking-tight">Autonomous Studio</span>
+    </a>
+    <div class="flex items-center gap-3">
+      <span class="hidden sm:inline-flex items-center gap-1.5 text-xs text-emerald-300"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 dot"></span><span data-i18n="online">Live</span></span>
+      <select id="langSelect" class="bg-slate-900 border border-white/10 rounded-lg text-sm text-slate-200 px-2.5 py-1.5"></select>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-5">
+
+  <!-- Hero -->
+  <section class="pt-16 pb-10 text-center">
+    <span class="chip inline-flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full text-indigo-200 mb-6">
+      <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+      <span data-i18n="badge">Built in any language · Delivered after payment</span>
+    </span>
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-[1.1]" data-i18n="heroTitle">
+      Describe your problem. Get a working kit.
+    </h1>
+    <p class="mt-5 text-lg text-slate-400 max-w-2xl mx-auto" data-i18n="heroSub">
+      Write in any language — no email needed. We analyse it instantly, show a plan and a fair price ($19–$99), then build a production-grade package you can buy and download securely.
+    </p>
+  </section>
+
+  <!-- Examples -->
+  <section class="pb-6">
+    <p class="text-center text-xs uppercase tracking-wider text-slate-500 mb-3" data-i18n="tryExamples">Try an example</p>
+    <div class="flex flex-wrap justify-center gap-2.5" id="examples"></div>
+  </section>
+
+  <!-- Input card -->
+  <section class="pb-10">
+    <div class="card p-5 md:p-6">
+      <label class="text-sm font-medium text-slate-300" data-i18n="describeLabel">Your problem (any language)</label>
+      <textarea id="problem" rows="4" maxlength="2000"
+        class="mt-2 w-full bg-[#0b0e17] border border-white/10 rounded-xl p-4 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 transition resize-none"
+        data-i18n-ph="placeholder"></textarea>
+      <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p class="text-xs text-slate-500" data-i18n="noEmail">No email required · Your language is auto-detected</p>
+        <button id="submitBtn" class="btn-grad text-white font-semibold px-7 py-3 rounded-xl glow hover:opacity-90 transition w-full sm:w-auto disabled:opacity-50">
+          <span data-i18n="analyze">Analyze my problem</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Result / plan -->
+  <section id="result" class="pb-10 hidden">
+    <div class="card p-6 border-indigo-500/30">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <h2 class="text-lg font-bold text-white" data-i18n="planTitle">Your solution plan</h2>
+        <span id="priceBadge" class="text-sm font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full"></span>
+      </div>
+      <div id="planText" class="mt-3 text-sm text-slate-300 whitespace-pre-line leading-relaxed"></div>
+      <div id="confirmWrap" class="mt-5 flex items-center justify-between gap-3 flex-wrap">
+        <p class="text-xs text-slate-500" data-i18n="confirmHint">Confirm to start the build. You'll get a ticket to track progress.</p>
+        <button id="confirmBtn" class="btn-grad text-white font-semibold px-6 py-2.5 rounded-xl hover:opacity-90 transition" data-i18n="confirm">Confirm &amp; start build</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tracker -->
+  <section id="tracker" class="pb-10 hidden">
+    <div class="card p-6 border-white/10">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <p class="text-xs text-slate-500" data-i18n="ticketId">Ticket</p>
+          <p id="ticketId" class="font-mono text-sky-300 text-lg"></p>
+        </div>
+        <span id="statusBadge" class="text-sm font-semibold px-3 py-1 rounded-full bg-sky-500/15 text-sky-300"></span>
+      </div>
+      <div class="mt-5">
+        <div class="h-2 rounded-full bg-white/5 overflow-hidden">
+          <div id="progressBar" class="h-full btn-grad transition-all duration-700" style="width:8%"></div>
+        </div>
+        <div class="flex justify-between mt-2 text-[11px] text-slate-500">
+          <span data-i18n="step1">Accepted</span><span data-i18n="step2">Building</span><span data-i18n="step3">Ready to buy</span>
+        </div>
+      </div>
+      <div id="readyWrap" class="mt-6 hidden">
+        <a id="buyLink" href="#" target="_blank" class="btn-grad text-white font-semibold px-7 py-3 rounded-xl glow hover:opacity-90 transition inline-block" data-i18n="buyNow">Buy &amp; download on Gumroad →</a>
+        <p class="mt-2 text-xs text-slate-500" data-i18n="paymentNote">Files are delivered only after payment, securely via Gumroad.</p>
+      </div>
+      <p id="trackerMsg" class="mt-4 text-xs text-slate-500" data-i18n="pollingNote">This page updates automatically every 5 seconds.</p>
+    </div>
+  </section>
+
+  <!-- Recent solutions -->
+  <section class="pb-16">
+    <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2"><span class="w-1.5 h-6 bg-indigo-500 rounded"></span><span data-i18n="recentTitle">Recently delivered kits</span></h2>
+    <div id="recentList" class="grid md:grid-cols-2 gap-3"></div>
+    <p id="recentEmpty" class="text-slate-500 text-sm" data-i18n="recentEmpty">No public kits yet — yours could be the first.</p>
+  </section>
+
+  <!-- How it works -->
+  <section class="pb-20">
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="card p-5"><div class="text-indigo-400 font-bold mb-2">1</div><p class="text-sm text-slate-300" data-i18n="how1">Describe your problem in your own language.</p></div>
+      <div class="card p-5"><div class="text-indigo-400 font-bold mb-2">2</div><p class="text-sm text-slate-300" data-i18n="how2">Get an instant plan and a transparent price.</p></div>
+      <div class="card p-5"><div class="text-indigo-400 font-bold mb-2">3</div><p class="text-sm text-slate-300" data-i18n="how3">Track the build live, then buy & download securely.</p></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="border-t border-white/5 py-8">
+  <div class="max-w-5xl mx-auto px-5 flex flex-col md:flex-row items-center justify-between gap-3">
+    <div class="flex items-center gap-2.5">
+      <span class="w-7 h-7 rounded-md grid place-items-center font-bold text-white text-xs btn-grad">AS</span>
+      <span class="font-semibold text-white">Autonomous Studio</span>
+    </div>
+    <p class="text-xs text-slate-500">© Autonomous Studio. Built autonomously.</p>
+  </div>
+</footer>
+
+<script>
+/* ---------------------------------------------------------------- i18n */
+const I18N = {
+  en: {online:"Live",badge:"Built in any language · Delivered after payment",heroTitle:"Describe your problem. Get a working kit.",heroSub:"Write in any language — no email needed. We analyse it instantly, show a plan and a fair price ($19–$99), then build a production-grade package you can buy and download securely.",tryExamples:"Try an example",describeLabel:"Your problem (any language)",placeholder:"e.g. I need a script that pulls product prices from a store and exports to CSV…",noEmail:"No email required · Your language is auto-detected",analyze:"Analyze my problem",planTitle:"Your solution plan",confirmHint:"Confirm to start the build. You'll get a ticket to track progress.",confirm:"Confirm & start build",ticketId:"Ticket",step1:"Accepted",step2:"Building",step3:"Ready to buy",buyNow:"Buy & download on Gumroad →",paymentNote:"Files are delivered only after payment, securely via Gumroad.",pollingNote:"This page updates automatically every 5 seconds.",recentTitle:"Recently delivered kits",recentEmpty:"No public kits yet — yours could be the first.",how1:"Describe your problem in your own language.",how2:"Get an instant plan and a transparent price.",how3:"Track the build live, then buy & download securely.",working:"Analyzing…",rejected:"Please describe a more specific software problem.",error:"Something went wrong. Please try again.",ex1:"I need a Python script that scrapes product prices and exports to CSV",ex2:"Build a small self-hosted API that converts uploaded CSV to JSON",ex3:"Generate a synthetic customer dataset with 2000 rows for testing",started:"Build started!",price:"Estimated price"},
+  ar: {online:"مباشر",badge:"بأي لغة · التسليم بعد الدفع",heroTitle:"اصف مشكلتك. واحصل على حزمة جاهزة.",heroSub:"اكتب بأي لغة — دون بريد إلكتروني. نحلّل طلبك فورًا ونعرض خطة وسعرًا عادلًا (19$–99$)، ثم نبني حزمة احترافية تشتريها وتنزّلها بأمان.",tryExamples:"جرّب مثالًا",describeLabel:"مشكلتك (بأي لغة)",placeholder:"مثال: أحتاج سكربت يجمع أسعار المنتجات ويصدّرها إلى CSV…",noEmail:"لا حاجة لبريد إلكتروني · تُكتشف لغتك تلقائيًا",analyze:"حلّل مشكلتي",planTitle:"خطة الحل المقترحة",confirmHint:"أكّد لبدء البناء. ستحصل على رقم تذكرة لتتبّع التقدّم.",confirm:"تأكيد وبدء البناء",ticketId:"التذكرة",step1:"مقبول",step2:"قيد البناء",step3:"جاهز للشراء",buyNow:"اشترِ ونزّل من Gumroad ←",paymentNote:"تُسلَّم الملفات فقط بعد الدفع بأمان عبر Gumroad.",pollingNote:"تُحدَّث هذه الصفحة تلقائيًا كل 5 ثوانٍ.",recentTitle:"حزم تم تسليمها حديثًا",recentEmpty:"لا حزم عامة بعد — قد تكون الأولى!",how1:"صِف مشكلتك بلغتك.",how2:"احصل على خطة فورية وسعر شفاف.",how3:"تابع البناء مباشرة ثم اشترِ ونزّل بأمان.",working:"جارٍ التحليل…",rejected:"من فضلك صِف مشكلة برمجية محددة أكثر.",error:"حدث خطأ. يُرجى المحاولة مجددًا.",ex1:"أحتاج سكربت بايثون يجمع أسعار المنتجات ويصدّرها إلى CSV",ex2:"ابنِ API مصغّرًا يحوّل ملف CSV المرفوع إلى JSON",ex3:"أنشئ بيانات عملاء اصطناعية بـ 2000 صف للاختبار",started:"بدأ البناء!",price:"السعر التقديري"},
+  es: {online:"En vivo",badge:"En cualquier idioma · Entrega tras el pago",heroTitle:"Describe tu problema. Recibe un kit funcional.",heroSub:"Escribe en cualquier idioma, sin correo. Analizamos al instante, mostramos un plan y un precio justo ($19–$99) y construimos un paquete listo para comprar y descargar.",tryExamples:"Prueba un ejemplo",describeLabel:"Tu problema (cualquier idioma)",placeholder:"ej. Necesito un script que extraiga precios y los exporte a CSV…",noEmail:"Sin correo · Tu idioma se detecta automáticamente",analyze:"Analizar mi problema",planTitle:"Tu plan de solución",confirmHint:"Confirma para iniciar. Recibirás un ticket de seguimiento.",confirm:"Confirmar e iniciar",ticketId:"Ticket",step1:"Aceptado",step2:"Construyendo",step3:"Listo para comprar",buyNow:"Comprar y descargar en Gumroad →",paymentNote:"Los archivos se entregan solo tras el pago, de forma segura vía Gumroad.",pollingNote:"Esta página se actualiza cada 5 segundos.",recentTitle:"Kits entregados recientemente",recentEmpty:"Aún no hay kits públicos — ¡el tuyo podría ser el primero!",how1:"Describe tu problema en tu idioma.",how2:"Recibe un plan y un precio transparente.",how3:"Sigue la construcción y compra con seguridad.",working:"Analizando…",rejected:"Describe un problema de software más concreto.",error:"Algo salió mal. Inténtalo de nuevo.",ex1:"Necesito un script en Python que extraiga precios y exporte a CSV",ex2:"Crea una API pequeña que convierta CSV subido a JSON",ex3:"Genera un dataset sintético de clientes con 2000 filas",started:"¡Construcción iniciada!",price:"Precio estimado"},
+  fr: {online:"En direct",badge:"Dans toutes les langues · Livré après paiement",heroTitle:"Décrivez votre problème. Recevez un kit prêt.",heroSub:"Écrivez dans n'importe quelle langue, sans e-mail. Nous analysons, proposons un plan et un prix juste ($19–$99), puis construisons un paquet à acheter et télécharger en toute sécurité.",tryExamples:"Essayez un exemple",describeLabel:"Votre problème (toute langue)",placeholder:"ex. J'ai besoin d'un script qui récupère les prix et exporte en CSV…",noEmail:"Aucun e-mail · Langue détectée automatiquement",analyze:"Analyser mon problème",planTitle:"Votre plan de solution",confirmHint:"Confirmez pour démarrer. Vous recevrez un ticket de suivi.",confirm:"Confirmer et démarrer",ticketId:"Ticket",step1:"Accepté",step2:"En construction",step3:"Prêt à acheter",buyNow:"Acheter et télécharger sur Gumroad →",paymentNote:"Les fichiers ne sont livrés qu'après paiement, via Gumroad.",pollingNote:"Cette page se met à jour toutes les 5 secondes.",recentTitle:"Kits récemment livrés",recentEmpty:"Pas encore de kits publics — le vôtre sera peut-être le premier !",how1:"Décrivez votre problème dans votre langue.",how2:"Obtenez un plan et un prix transparent.",how3:"Suivez et achetez en toute sécurité.",working:"Analyse…",rejected:"Décrivez un problème logiciel plus précis.",error:"Une erreur est survenue. Réessayez.",ex1:"J'ai besoin d'un script Python qui extrait les prix et exporte en CSV",ex2:"Créez une petite API qui convertit un CSV en JSON",ex3:"Générez un jeu de données client synthétique de 2000 lignes",started:"Construction démarrée !",price:"Prix estimé"},
+  de: {online:"Live",badge:"In jeder Sprache · Lieferung nach Zahlung",heroTitle:"Beschreiben Sie Ihr Problem. Erhalten Sie ein fertiges Kit.",heroSub:"Schreiben Sie in jeder Sprache, ohne E-Mail. Wir analysieren sofort, zeigen einen Plan und einen fairen Preis ($19–$99) und bauen ein Paket zum sicheren Kaufen und Herunterladen.",tryExamples:"Beispiel testen",describeLabel:"Ihr Problem (jede Sprache)",placeholder:"z.B. Ich brauche ein Skript, das Preise sammelt und als CSV exportiert…",noEmail:"Keine E-Mail nötig · Sprache automatisch erkannt",analyze:"Mein Problem analysieren",planTitle:"Ihr Lösungsplan",confirmHint:"Bestätigen Sie, um zu starten. Sie erhalten ein Tracking-Ticket.",confirm:"Bestätigen & starten",ticketId:"Ticket",step1:"Akzeptiert",step2:"Im Bau",step3:"Kaufbereit",buyNow:"Kaufen & auf Gumroad herunterladen →",paymentNote:"Dateien werden erst nach Zahlung über Gumroad geliefert.",pollingNote:"Diese Seite aktualisiert sich alle 5 Sekunden.",recentTitle:"Kürzlich gelieferte Kits",recentEmpty:"Noch keine öffentlichen Kits — Ihres könnte das erste sein!",how1:"Beschreiben Sie Ihr Problem in Ihrer Sprache.",how2:"Erhalten Sie Plan und transparenten Preis.",how3:"Live verfolgen, dann sicher kaufen.",working:"Analysiere…",rejected:"Bitte beschreiben Sie ein konkreteres Software-Problem.",error:"Etwas ist schiefgelaufen. Bitte erneut versuchen.",ex1:"Ich brauche ein Python-Skript, das Preise sammelt und als CSV exportiert",ex2:"Baue eine kleine API, die CSV in JSON umwandelt",ex3:"Erzeuge einen synthetischen Kundendatensatz mit 2000 Zeilen",started:"Bau gestartet!",price:"Geschätzter Preis"},
+  zh: {online:"在线",badge:"任意语言 · 付款后交付",heroTitle:"描述您的问题，获得可用的工具包。",heroSub:"用任意语言书写，无需邮箱。我们即时分析，给出方案和公平价格（$19–$99），并构建可安全购买下载的专业包。",tryExamples:"试试示例",describeLabel:"您的问题（任意语言）",placeholder:"例如：我需要一个抓取商品价格并导出为CSV的脚本…",noEmail:"无需邮箱 · 自动识别您的语言",analyze:"分析我的问题",planTitle:"您的解决方案",confirmHint:"确认以开始构建，您将获得一个跟踪工单。",confirm:"确认并开始",ticketId:"工单",step1:"已接受",step2:"构建中",step3:"可购买",buyNow:"在 Gumroad 购买并下载 →",paymentNote:"文件仅在付款后通过 Gumroad 安全交付。",pollingNote:"此页面每 5 秒自动更新。",recentTitle:"最近交付的工具包",recentEmpty:"暂无公开工具包——您的可能是第一个！",how1:"用您的语言描述问题。",how2:"获取即时方案与透明价格。",how3:"实时跟踪，然后安全购买。",working:"分析中…",rejected:"请描述更具体的软件问题。",error:"出错了，请重试。",ex1:"我需要一个抓取商品价格并导出为CSV的Python脚本",ex2:"构建一个小型API将上传的CSV转换为JSON",ex3:"生成包含2000行数据的合成客户数据集用于测试",started:"构建已开始！",price:"预估价格"},
+  ja: {online:"ライブ",badge:"あらゆる言語 · 支払い後に納品",heroTitle:"問題を説明し、動くキットを受け取る。",heroSub:"どの言語でも、メール不要。即座に分析し、計画と適正価格（$19–$99）を提示。安全に購入・ダウンロードできる本番品質のパッケージを構築します。",tryExamples:"例を試す",describeLabel:"あなたの問題（任意の言語）",placeholder:"例：商品価格を取得してCSVに出力するスクリプトが必要です…",noEmail:"メール不要 · 言語は自動検出",analyze:"問題を分析",planTitle:"あなたの解決プラン",confirmHint:"確認して構築を開始。追跡チケットが発行されます。",confirm:"確認して開始",ticketId:"チケット",step1:"承認済み",step2:"構築中",step3:"購入可能",buyNow:"Gumroadで購入・ダウンロード →",paymentNote:"ファイルは支払い後にGumroad経由で安全に納品されます。",pollingNote:"このページは5秒ごとに更新されます。",recentTitle:"最近納品されたキット",recentEmpty:"まだ公開キットはありません—最初の一つになるかも！",how1:"あなたの言語で問題を説明。",how2:"即時の計画と透明な価格。",how3:"ライブ追跡して安全に購入。",working:"分析中…",rejected:"より具体的なソフトウェアの問題を説明してください。",error:"エラーが発生しました。再試行してください。",ex1:"商品価格を取得してCSVに出力するPythonスクリプトが必要",ex2:"アップロードしたCSVをJSONに変換する小さなAPIを作る",ex3:"テスト用に2000行の合成顧客データセットを生成",started:"構築を開始しました！",price:"見積価格"},
+  pt: {online:"Ao vivo",badge:"Em qualquer idioma · Entrega após pagamento",heroTitle:"Descreva seu problema. Receba um kit funcional.",heroSub:"Escreva em qualquer idioma, sem e-mail. Analisamos na hora, mostramos um plano e um preço justo ($19–$99) e construímos um pacote para comprar e baixar com segurança.",tryExamples:"Teste um exemplo",describeLabel:"Seu problema (qualquer idioma)",placeholder:"ex. Preciso de um script que extraia preços e exporte para CSV…",noEmail:"Sem e-mail · Seu idioma é detectado automaticamente",analyze:"Analisar meu problema",planTitle:"Seu plano de solução",confirmHint:"Confirme para iniciar. Você receberá um ticket de acompanhamento.",confirm:"Confirmar e iniciar",ticketId:"Ticket",step1:"Aceito",step2:"Construindo",step3:"Pronto para comprar",buyNow:"Comprar e baixar no Gumroad →",paymentNote:"Os arquivos são entregues apenas após o pagamento, via Gumroad.",pollingNote:"Esta página atualiza a cada 5 segundos.",recentTitle:"Kits entregues recentemente",recentEmpty:"Ainda não há kits públicos — o seu pode ser o primeiro!",how1:"Descreva seu problema no seu idioma.",how2:"Receba um plano e um preço transparente.",how3:"Acompanhe ao vivo e compre com segurança.",working:"Analisando…",rejected:"Descreva um problema de software mais específico.",error:"Algo deu errado. Tente novamente.",ex1:"Preciso de um script Python que extraia preços e exporte para CSV",ex2:"Crie uma pequena API que converte CSV enviado em JSON",ex3:"Gere um conjunto de dados sintético de clientes com 2000 linhas",started:"Construção iniciada!",price:"Preço estimado"},
+  hi: {online:"लाइव",badge:"किसी भी भाषा में · भुगतान के बाद डिलीवरी",heroTitle:"अपनी समस्या बताएं। तैयार किट पाएं।",heroSub:"किसी भी भाषा में लिखें, ईमेल की ज़रूरत नहीं। हम तुरंत विश्लेषण करते हैं, योजना और उचित मूल्य ($19–$99) दिखाते हैं, फिर सुरक्षित रूप से खरीदने योग्य पैकेज बनाते हैं।",tryExamples:"उदाहरण आज़माएं",describeLabel:"आपकी समस्या (कोई भी भाषा)",placeholder:"उदा. मुझे एक स्क्रिप्ट चाहिए जो उत्पाद कीमतें लाकर CSV में निर्यात करे…",noEmail:"ईमेल आवश्यक नहीं · आपकी भाषा स्वतः पहचानी जाती है",analyze:"मेरी समस्या का विश्लेषण करें",planTitle:"आपकी समाधान योजना",confirmHint:"शुरू करने के लिए पुष्टि करें। आपको ट्रैकिंग टिकट मिलेगा।",confirm:"पुष्टि करें और शुरू करें",ticketId:"टिकट",step1:"स्वीकृत",step2:"निर्माण हो रहा है",step3:"खरीदने के लिए तैयार",buyNow:"Gumroad पर खरीदें और डाउनलोड करें →",paymentNote:"फ़ाइलें केवल भुगतान के बाद, Gumroad के माध्यम से सुरक्षित रूप से दी जाती हैं।",pollingNote:"यह पृष्ठ हर 5 सेकंड में अपडेट होता है।",recentTitle:"हाल ही में डिलीवर की गई किट",recentEmpty:"अभी कोई सार्वजनिक किट नहीं — आपकी पहली हो सकती है!",how1:"अपनी भाषा में समस्या बताएं।",how2:"तुरंत योजना और पारदर्शी मूल्य पाएं।",how3:"लाइव ट्रैक करें, फिर सुरक्षित खरीदें।",working:"विश्लेषण हो रहा है…",rejected:"कृपया अधिक विशिष्ट सॉफ़्टवेयर समस्या बताएं।",error:"कुछ गलत हो गया। फिर से प्रयास करें।",ex1:"मुझे एक Python स्क्रिप्ट चाहिए जो उत्पाद कीमतें लाकर CSV में निर्यात करे",ex2:"अपलोड किए गए CSV को JSON में बदलने वाला छोटा API बनाएं",ex3:"परीक्षण के लिए 2000 पंक्तियों वाला सिंथेटिक ग्राहक डेटासेट बनाएं",started:"निर्माण शुरू हुआ!",price:"अनुमानित मूल्य"}
+};
+const LANGS = [["en","English"],["ar","العربية"],["es","Español"],["fr","Français"],["de","Deutsch"],["zh","中文"],["ja","日本語"],["pt","Português"],["hi","हिन्दी"]];
+let LANG = "en";
+
+function t(k){ return (I18N[LANG] && I18N[LANG][k]) || I18N.en[k] || k; }
+
+function detectLang(){
+  const saved = localStorage.getItem("as_lang");
+  if (saved && I18N[saved]) return saved;
+  const cands = navigator.languages || [navigator.language || "en"];
+  for (const c of cands){
+    const code = c.toLowerCase().split("-")[0];
+    if (I18N[code]) return code;
+  }
+  return "en";
+}
+
+function applyLang(code){
+  LANG = I18N[code] ? code : "en";
+  localStorage.setItem("as_lang", LANG);
+  const rtl = LANG === "ar" || LANG === "hi" || LANG === "he" || LANG === "fa";
+  document.documentElement.setAttribute("dir", rtl ? "rtl" : "ltr");
+  document.documentElement.setAttribute("lang", LANG);
+  document.querySelectorAll("[data-i18n]").forEach(el=>{ el.textContent = t(el.getAttribute("data-i18n")); });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{ el.setAttribute("placeholder", t(el.getAttribute("data-i18n-ph"))); });
+  renderExamples();
+}
+
+function renderExamples(){
+  const ex = [t("ex1"), t("ex2"), t("ex3")];
+  const wrap = document.getElementById("examples");
+  wrap.innerHTML = "";
+  ex.forEach(txt=>{
+    const b = document.createElement("button");
+    b.className = "text-xs px-3.5 py-2 rounded-full border border-white/10 text-slate-300 hover:bg-white/5 hover:border-indigo-500/40 transition text-start";
+    b.textContent = txt.length > 52 ? txt.slice(0,52) + "…" : txt;
+    b.onclick = ()=>{ document.getElementById("problem").value = txt; document.getElementById("problem").focus(); };
+    wrap.appendChild(b);
+  });
+}
+
+/* ---------------------------------------------------------------- API */
+let API = "";
+async function loadApiConfig(){
+  try {
+    const r = await fetch("api-config.json?ts=" + Date.now(), {cache:"no-store"});
+    if (r.ok){ const cfg = await r.json(); API = (cfg.api_base || "").replace(/\/$/, ""); }
+  } catch(e){ /* offline */ }
+  if (!API) { /* keep empty; analyze will show error */ }
+}
+
+async function api(path, method="GET", body=null){
+  if (!API) throw new Error("no-api");
+  const opts = { method, headers: {"Content-Type":"application/json"} };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(API + path, opts);
+  return await r.json();
+}
+
+const submitBtn = document.getElementById("submitBtn");
+submitBtn.onclick = async ()=>{
+  const problem = document.getElementById("problem").value.trim();
+  if (problem.length < 12) return;
+  submitBtn.disabled = true;
+  const orig = submitBtn.querySelector("[data-i18n]").textContent;
+  submitBtn.querySelector("[data-i18n]").textContent = t("working");
+  try {
+    const res = await api("/public/solve", "POST", {problem});
+    if (!res.ok){
+      alert(res.reply || t("rejected"));
+      return;
+    }
+    showPlan(res);
+  } catch(e){
+    alert(t("error"));
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.querySelector("[data-i18n]").textContent = orig;
+  }
+};
+
+let currentTicket = "";
+function showPlan(res){
+  currentTicket = res.ticket_id;
+  document.getElementById("result").classList.remove("hidden");
+  document.getElementById("priceBadge").textContent = "$" + Math.round(res.price_usd) + " · " + t("price");
+  document.getElementById("planText").textContent = res.plan || res.reply || "";
+  document.getElementById("confirmBtn").onclick = ()=> confirmBuild(res.ticket_id);
+  document.getElementById("result").scrollIntoView({behavior:"smooth", block:"center"});
+}
+
+async function confirmBuild(ticket){
+  const btn = document.getElementById("confirmBtn");
+  btn.disabled = true;
+  try {
+    const res = await api("/public/confirm/" + encodeURIComponent(ticket), "POST");
+    if (!res.ok){
+      alert(res.error === "daily_cap" ? "Daily build limit reached (3/day). Please try tomorrow." : t("error"));
+      return;
+    }
+    startTracker(ticket);
+  } catch(e){ alert(t("error")); }
+  finally { btn.disabled = false; }
+}
+
+let pollTimer = null;
+function startTracker(ticket){
+  document.getElementById("result").classList.add("hidden");
+  document.getElementById("tracker").classList.remove("hidden");
+  document.getElementById("ticketId").textContent = ticket;
+  localStorage.setItem("as_ticket", ticket);
+  document.getElementById("tracker").scrollIntoView({behavior:"smooth", block:"center"});
+  poll(ticket);
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(()=>poll(ticket), 5000);
+}
+
+async function poll(ticket){
+  try {
+    const res = await api("/public/status/" + encodeURIComponent(ticket));
+    if (!res.ok) return;
+    updateTracker(res);
+  } catch(e){ /* keep polling */ }
+}
+
+function updateTracker(res){
+  const badge = document.getElementById("statusBadge");
+  const bar = document.getElementById("progressBar");
+  const map = {
+    analyzing: ["#f59e0b", "8%"], accepted: ["#f59e0b", "15%"],
+    building: ["#38bdf8", "55%"], live: ["#10b981", "100%"], failed: ["#f43f5e", "100%"], rejected: ["#f43f5e", "100%"]
+  };
+  const [color, width] = map[res.status] || ["#38bdf8", "40%"];
+  badge.textContent = res.status.toUpperCase();
+  badge.style.color = color;
+  bar.style.width = width;
+  if (res.status === "live" && res.product_url){
+    document.getElementById("readyWrap").classList.remove("hidden");
+    document.getElementById("buyLink").href = res.product_url;
+    document.getElementById("trackerMsg").textContent = "";
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  }
+}
+
+async function loadRecent(){
+  try {
+    const res = await api("/public/recent");
+    const list = document.getElementById("recentList");
+    const empty = document.getElementById("recentEmpty");
+    if (!res.items || !res.items.length){ empty.style.display = "block"; return; }
+    empty.style.display = "none";
+    list.innerHTML = "";
+    res.items.forEach(it=>{
+      const div = document.createElement("div");
+      div.className = "card p-4";
+      const title = (it.title || "Custom Kit");
+      const cat = (it.category || "").replace(/_/g," ");
+      div.innerHTML = `<div class="flex justify-between items-start gap-2">
+        <span class="font-semibold text-white text-sm">${escapeHtml(title)}</span>
+        <span class="text-emerald-300 text-sm font-bold">$${Math.round(it.price_usd)}</span></div>
+        <p class="text-xs text-slate-500 mt-1">${escapeHtml(cat)} · ${escapeHtml(it.lang||"")}</p>`;
+      list.appendChild(div);
+    });
+  } catch(e){}
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+/* ---------------------------------------------------------------- init */
+(function init(){
+  const sel = document.getElementById("langSelect");
+  LANGS.forEach(([code,name])=>{
+    const o = document.createElement("option"); o.value = code; o.textContent = name; sel.appendChild(o);
+  });
+  LANG = detectLang();
+  sel.value = LANG;
+  sel.onchange = ()=> applyLang(sel.value);
+  applyLang(LANG);
+  loadApiConfig().then(()=>{ loadRecent(); });
+  // Resume an existing ticket after reload.
+  const saved = localStorage.getItem("as_ticket");
+  if (saved){ startTracker(saved); }
+})();
+</script>
+</body>
+</html>
